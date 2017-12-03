@@ -169,7 +169,7 @@ void softPotUpdate(){
 void soundUpdate(){
   if (analogRead(soundPin) <= 50){
       amplitude = analogRead(soundPin);
-      amplitude = map(analogRead, 0, 28, 0, 255);
+      amplitude = map(amplitude, 0, 28, 0, 255);
   }
 }
 
@@ -186,18 +186,18 @@ void lightSensing(){
   //segment 1 update
   for (uint16_t i = 0; i < topVal; i++){
     Serial.print(i);
-    strip.setPixelColor(segment1[i], strip.Color(color_seg1));
+    strip.setPixelColor(segment1[i], color_seg1);
   }
   //segment 2 update
   for (uint16_t i = 0; i < middleVal; i++){
     Serial.print(i);
-    strip.setPixelColor(segment2[i], strip.Color(color_seg2));
+    strip.setPixelColor(segment2[i], color_seg2);
   }  
   
   //segment 3 update
   for (uint16_t i = 0; i < bottomVal; i++){
     Serial.print(i);
-    strip.setPixelColor(segment3[i], strip.Color(color_seg3));
+    strip.setPixelColor(segment3[i], color_seg3);
   }
   strip.show();
   delay(100);
@@ -222,14 +222,13 @@ void colorFlash(uint32_t color, byte hexSize){
       delay(40);
     }
   }
-  else //assuming it's 3{
-  for (uint16_t i = 0; i < sizeof(smallHex)/sizeof(uint32_t); i++) {
+  else{ //assuming it's 3
+    for (uint16_t i = 0; i < sizeof(smallHex)/sizeof(uint32_t); i++) {
       strip.setPixelColor(smallHex[i], color);
       strip.show();
       delay(40);
     }
   }
- 
 }
 
 //FOLLOWING FROM ADAFRUIT ARDUINO LIBRARY EXAMPLES
