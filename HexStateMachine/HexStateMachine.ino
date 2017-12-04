@@ -8,9 +8,9 @@ void soundUpdate(); //updates & maps sound sensor readings to 32 unsigned int
 void colorUpdate(); //scales sound value to colors
 void lightSensing(); //sets lights and color based on sensor input
 void colorFlash(uint32_t color, byte hexSize); //flashes through strip with certain color
+void hexFlash(); //color flash through each hexagon with specific pattern
 uint32_t Wheel(int WheelPos); //converts value 0 - 255 to color
 void theaterChaseRainbow(uint8_t wait); //crawls through lights with rainbow pattern
-
 
 //analog pins
 #define topPot A0
@@ -22,7 +22,10 @@ void theaterChaseRainbow(uint8_t wait); //crawls through lights with rainbow pat
 #define interruptPin 3
 #define stripPin 6
 
+//state machine setup & interrupt pin debouncing
 volatile int state;
+long debouncingTime = 15;
+volatile unsigned long lastMicros;
 
 //global potentiometer values
 int topVal;
@@ -89,7 +92,8 @@ void setup() {
   uint32_t color_seg3 = 0;
 
   //state machine setup
-  state = 2;
+  state = 0;
+  lastMicros = 0;
 }
 
 void loop() {
@@ -100,57 +104,39 @@ void loop() {
 void stateMachine(){
   switch(state){
     case 0: //Sensing mode
-    Serial.println("State 0");
-    softPotUpdate();
-    colorUpdate();
-    lightSensing();
-    break;
+      Serial.println("State 0");
+      softPotUpdate();
+      colorUpdate();
+      lightSensing();
+      break;
     case 1: //Color fade through whole strand mode
-    Serial.println("State 1");
-    theaterChaseRainbow(40);
-    break;
+      Serial.println("State 1");
+      theaterChaseRainbow(40);
+      break;
     case 2: //Flashy through each hex mode
-    Serial.println("State 2");
-    colorFlash(lightBlue, 3);
-    delay(100);
-    colorFlash(off, 3);
-    delay(100);
-    colorFlash(medBlue, 2);
-    delay(100);
-    colorFlash(off, 2);
-    delay(100);
-    colorFlash(royalBlue, 1);
-    delay(100);
-    colorFlash(off, 1);
-    delay(100);
-    colorFlash(lightPurple, 3);
-    delay(100);
-    colorFlash(off, 3);
-    delay(100);
-    colorFlash(medPurple, 2);
-    delay(100);
-    colorFlash(off, 2);
-    delay(100);
-    colorFlash(deepPurple, 1);
-    delay(100);
-    colorFlash(off, 1);
-    break;
+      Serial.println("State 2");
+      hexFlash();
+      break;
     case 3: //Clear lights
-    Serial.println("State 3");
-    strip.clear();
-    strip.show();
-    break;
+      Serial.println("State 3");
+      strip.clear();
+      strip.show();
+      break;
   }
 }
 
 //button interrupt service routine
 void changeState(){
-  if (state < 3){
-    state = state + 1;
+  if((long)(micros() - lastMicros) >= debouncingTime * 1000){
+    if (state < 3){
+      state = state + 1;
+    }
+    else{
+      state = 0;
+      }
+    lastMicros = micros();
   }
-  else{
-    state = 0;
-  }
+
 }
 
 //read soft potentiometers, scale to length of LED segments
@@ -250,6 +236,70 @@ void colorFlash(uint32_t color, byte hexSize){
   }
 }
 
+//color flash through each hexagon with specific pattern
+void hexFlash(){
+  if (state!=1){
+    return;
+  }
+  colorFlash(lightBlue, 3);
+  delay(100);
+  if (state!=1){
+    return;
+  }
+  colorFlash(off, 3);
+  delay(100);
+  if (state!=2){
+    return;
+  }
+  colorFlash(medBlue, 2);
+  delay(100);
+  if (state!=2){
+    return;
+  }
+  colorFlash(off, 2);
+  delay(100);
+  if (state!=2){
+    return;
+  }
+  colorFlash(royalBlue, 1);
+  delay(100);
+  if (state!=2){
+    return;
+  }
+  colorFlash(off, 1);
+  delay(100);
+  if (state!=2){
+    return;
+  }
+  colorFlash(lightPurple, 3);
+  delay(100);
+  if (state!=2){
+    return;
+  }
+  colorFlash(off, 3);
+  delay(100);
+  if (state!=2){
+    return;
+  }
+  colorFlash(medPurple, 2);
+  delay(100);
+  if (state!=2){
+    return;
+  }
+  colorFlash(off, 2);
+  delay(100);
+  if (state!=2){
+    return;
+  }
+  colorFlash(deepPurple, 1);
+  delay(100);
+  if (state!=2){
+    return;
+  }
+  colorFlash(off, 1);
+  delay(100);
+}
+
 //FOLLOWING FROM ADAFRUIT ARDUINO LIBRARY EXAMPLES
 
 // Input a value 0 to 255 to get a color value.
@@ -272,15 +322,22 @@ void theaterChaseRainbow(uint8_t wait) {
   for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
     for (int q=0; q < 3; q++) {
       for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
+        if (state != 1){
+          return;
+        }
         strip.setPixelColor(i+q, Wheel( (i+j) % 255));    //turn every third pixel on
       }
       strip.show();
-
       delay(wait);
 
       for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
+        if (state != 1){
+          return;
+        }
         strip.setPixelColor(i+q, 0);        //turn every third pixel off
       }
+      strip.show();
+      delay(wait);
     }
   }
 }
