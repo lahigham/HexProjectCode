@@ -54,12 +54,9 @@ uint32_t smallHex[]= {78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,9
 
 //colors
 uint32_t off = strip.Color(0,0,0); //would be white if strip was an RGBW
-uint32_t lightBlue = strip.Color(0,255,255);
-uint32_t medBlue = strip.Color(0,205,255);
+uint32_t medBlue = strip.Color(0,255,255);
 uint32_t royalBlue = strip.Color(0,0,255);
-uint32_t lightPurple = strip.Color(239,201,255);
-uint32_t medPurple = strip.Color(207,116,246);
-uint32_t deepPurple = strip.Color(180,0,255);
+uint32_t lightBlue = strip.Color(7,33,130);
 
 void setup() {
   //serial monitor setup
@@ -83,7 +80,7 @@ void setup() {
 
   //LED strip setup
   strip.begin();
-  strip.setBrightness(50); //75% brightness
+  strip.setBrightness(50); //20% brightness
   strip.show();
 
   //color setup
@@ -111,7 +108,7 @@ void stateMachine(){
       break;
     case 1: //Color fade through whole strand mode
       Serial.println("State 1");
-      theaterChaseRainbow(40);
+      theaterChaseRainbow(50);
       break;
     case 2: //Flashy through each hex mode
       Serial.println("State 2");
@@ -178,6 +175,7 @@ void lightSensing(){
   for (uint16_t i = 0; i < sizeof(segment1)/sizeof(uint32_t); i++){
     //Serial.print(i);
     if (i < topVal){
+      strip.setBrightness(50); //20% brightness
       strip.setPixelColor(segment1[i], color_seg1);
     }
     else{
@@ -188,6 +186,7 @@ void lightSensing(){
   for (uint16_t i = 0; i < sizeof(segment2)/sizeof(uint32_t); i++){
     //Serial.print(i);
     if (i < middleVal){
+      strip.setBrightness(50); //20% brightness
       strip.setPixelColor(segment2[i], color_seg2);
     }
     else{
@@ -198,6 +197,7 @@ void lightSensing(){
   for (uint16_t i = 0; i < sizeof(segment3)/sizeof(uint32_t); i++){
     //Serial.print(i);
     if (i < bottomVal){
+      strip.setBrightness(50); //20% brightness
       strip.setPixelColor(segment3[i], color_seg3);
     }
     else{
@@ -215,6 +215,7 @@ void lightSensing(){
 void colorFlash(uint32_t color, byte hexSize){
   if (hexSize == 1){
     for (uint16_t i = 0; i < sizeof(bigHex)/sizeof(uint32_t); i++) {
+      strip.setBrightness(50); //20% brightness
       strip.setPixelColor(bigHex[i], color);
       strip.show();
       delay(40);
@@ -222,6 +223,7 @@ void colorFlash(uint32_t color, byte hexSize){
   }
   else if (hexSize == 2){
     for (uint16_t i = 0; i < sizeof(middleHex)/sizeof(uint32_t); i++) {
+      strip.setBrightness(50); //20% brightness
       strip.setPixelColor(middleHex[i], color);
       strip.show();
       delay(40);
@@ -229,6 +231,7 @@ void colorFlash(uint32_t color, byte hexSize){
   }
   else{ //assuming it's 3
     for (uint16_t i = 0; i < sizeof(smallHex)/sizeof(uint32_t); i++) {
+      strip.setBrightness(50); //20% brightness
       strip.setPixelColor(smallHex[i], color);
       strip.show();
       delay(40);
@@ -238,12 +241,14 @@ void colorFlash(uint32_t color, byte hexSize){
 
 //color flash through each hexagon with specific pattern
 void hexFlash(){
-  if (state!=1){
+  strip.clear();
+  strip.show();
+  if (state!=2){
     return;
   }
   colorFlash(lightBlue, 3);
   delay(100);
-  if (state!=1){
+  if (state!=2){
     return;
   }
   colorFlash(off, 3);
@@ -262,36 +267,6 @@ void hexFlash(){
     return;
   }
   colorFlash(royalBlue, 1);
-  delay(100);
-  if (state!=2){
-    return;
-  }
-  colorFlash(off, 1);
-  delay(100);
-  if (state!=2){
-    return;
-  }
-  colorFlash(lightPurple, 3);
-  delay(100);
-  if (state!=2){
-    return;
-  }
-  colorFlash(off, 3);
-  delay(100);
-  if (state!=2){
-    return;
-  }
-  colorFlash(medPurple, 2);
-  delay(100);
-  if (state!=2){
-    return;
-  }
-  colorFlash(off, 2);
-  delay(100);
-  if (state!=2){
-    return;
-  }
-  colorFlash(deepPurple, 1);
   delay(100);
   if (state!=2){
     return;
@@ -325,6 +300,7 @@ void theaterChaseRainbow(uint8_t wait) {
         if (state != 1){
           return;
         }
+        strip.setBrightness(50); //20% brightness
         strip.setPixelColor(i+q, Wheel( (i+j) % 255));    //turn every third pixel on
       }
       strip.show();
@@ -336,7 +312,6 @@ void theaterChaseRainbow(uint8_t wait) {
         }
         strip.setPixelColor(i+q, 0);        //turn every third pixel off
       }
-      strip.show();
       delay(wait);
     }
   }
